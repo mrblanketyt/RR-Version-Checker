@@ -1,0 +1,24 @@
+name: Version Checker
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get latest version information
+        run: |
+          curl https://raw.githubusercontent.com/mrblanketyt/RR-Version-Checker/main/latest-version.json > latest-version.json
+      - name: Compare versions and notify if update is available
+        run: |
+          VERSION=$(jq -r '.version' latest-version.json)
+          if [ "$VERSION" != "CURRENT_VERSION" ]; then
+            echo "A new version of MyPlugin is available ($VERSION)! Download it from $(jq -r '.downloadLink' latest-version.json)"
+          fi
+        env:
+          CURRENT_VERSION: 1.1.0
+          GH_PAT: ${{ secrets.GH_PAT }}
